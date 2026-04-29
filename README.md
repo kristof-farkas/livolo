@@ -14,7 +14,7 @@ Home Assistant custom component Livolo okoskapcsolók és dimmerek vezérlésér
 
 1. Telepítsd a [HACS](https://hacs.xyz/)-t
 2. HACS → Integrations → Custom repositories
-3. Repo URL: `https://github.com/kristof-farkas/livolo_home_assistant`
+3. Repo URL: `https://github.com/kristof-farkas/livolo`
 4. Típus: Integration → Add
 5. Keresd meg a "Livolo" integrációt és telepítsd
 6. Indítsd újra a Home Assistantot

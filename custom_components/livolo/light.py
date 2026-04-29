@@ -225,7 +225,9 @@ class LivoloDimmerEntity(CoordinatorEntity[LivoloDataUpdateCoordinator], LightEn
         if ATTR_BRIGHTNESS in kwargs:
             # HA sends 0-255, convert to 0-100
             props["bri"] = round(kwargs[ATTR_BRIGHTNESS] * 100 / 255)
+        _LOGGER.warning("DIMMER turn_on: iot_id=%s props=%s", self._iot_id, props)
         await self.coordinator.set_device_properties_bulk(self._iot_id, props)
 
     async def async_turn_off(self, **kwargs: Any) -> None:
-        await self.coordinator.set_device_property(self._iot_id, "on", 0)
+        _LOGGER.warning("DIMMER turn_off: iot_id=%s", self._iot_id)
+        await self.coordinator.set_device_properties_bulk(self._iot_id, {"on": 0})
