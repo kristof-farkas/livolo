@@ -1,0 +1,35 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Livolo Configuration",
+        "description": "Enter your Livolo account credentials",
+        "data": {
+          "email": "Email",
+          "password": "Password",
+          "country_code": "Country Code (e.g., DE, US)",
+          "app_key": "App Key",
+          "app_secret": "App Secret",
+          "has_entity_name": "Compose entity name with device name ex: Device Name Switch Name"
+        }
+      }
+    },
+    "error": {
+      "invalid_auth": "Invalid authentication credentials",
+      "unknown": "Unknown error occurred"
+    },
+    "abort": {
+      "already_configured": "Account is already configured"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Livolo Options",
+        "data": {
+          "has_entity_name": "Compose entity name with device name ex: Device Name Switch Name"
+        }
+      }
+    }
+  }
+}
