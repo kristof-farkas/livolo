@@ -871,6 +871,10 @@ class LivoloClient:
         """Set device properties."""
         return await self._api_request("/thing/properties/set", "1.0.2", {"iotId": iot_id, "items": items})
 
+    async def set_group_properties(self, group_id: str, items: dict[str, Any]) -> dict[str, Any]:
+        """Set properties on a Zigbee group."""
+        return await self._api_request("/living/group/property/set", "1.0.0", {"groupId": group_id, "items": items})
+
     async def get_device_properties(self, iot_id: str) -> dict[str, Any]:
         """Get device properties."""
         return await self._api_request("/thing/properties/get", "1.0.2", {"iotId": iot_id})

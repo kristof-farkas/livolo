@@ -75,7 +75,8 @@ async def async_setup_entry(
         device_name = device.get("nickName") or device.get("name") or iot_id
         
         prop_ids = {p.get("identifier") for p in property_list}
-        is_dimmer = device.get("categoryKey") == "Dimming_panel" or ("on" in prop_ids and "bri" in prop_ids)
+        category_key = (device.get("categoryKey") or "").lower()
+        is_dimmer = "dimm" in category_key or ("on" in prop_ids and "bri" in prop_ids)
 
         if is_dimmer:
             entities.append(
@@ -223,11 +224,8 @@ class LivoloDimmerEntity(CoordinatorEntity[LivoloDataUpdateCoordinator], LightEn
     async def async_turn_on(self, **kwargs: Any) -> None:
         props: dict = {"on": 1}
         if ATTR_BRIGHTNESS in kwargs:
-            # HA sends 0-255, convert to 0-100
             props["bri"] = round(kwargs[ATTR_BRIGHTNESS] * 100 / 255)
-        _LOGGER.warning("DIMMER turn_on: iot_id=%s props=%s", self._iot_id, props)
         await self.coordinator.set_device_properties_bulk(self._iot_id, props)
 
     async def async_turn_off(self, **kwargs: Any) -> None:
-        _LOGGER.warning("DIMMER turn_off: iot_id=%s", self._iot_id)
         await self.coordinator.set_device_properties_bulk(self._iot_id, {"on": 0})

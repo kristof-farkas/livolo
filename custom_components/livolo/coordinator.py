@@ -67,13 +67,8 @@ class LivoloDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             # Get devices
             devices = await self.client.get_devices()
             for _d in devices:
-                _LOGGER.warning(
-                    "LIVOLO DEVICE DUMP | name=%s | category=%s | nodeType=%s | properties=%s",
-                    _d.get("nickName") or _d.get("name"),
-                    _d.get("categoryKey"),
-                    _d.get("nodeType"),
-                    [{"id": p.get("identifier"), "value": p.get("value")} for p in _d.get("propertyList", [])],
-                )
+                if _d.get("nodeType") == "GATEWAY":
+                    _LOGGER.warning("GATEWAY FULL DATA: %s", {k: v for k, v in _d.items() if k != "propertyList"})
             # get_devices() can trigger refresh/re-login via LivoloClient retry logic;
             # keep MQTT session data in sync even if refresh didn't happen in the pre-check.
             await self._update_mqtt_token()
@@ -231,6 +226,6 @@ class LivoloDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         await self.async_request_refresh()
 
     async def set_device_properties_bulk(self, iot_id: str, properties: dict) -> None:
-        """Set multiple device properties at once."""
+        """Set multiple device properties at once via REST API."""
         await self.client.set_device_properties(iot_id, properties)
         await self.async_request_refresh()

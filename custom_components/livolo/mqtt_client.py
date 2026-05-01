@@ -217,6 +217,55 @@ class LivoloMqttClient:
             _LOGGER.error("Failed to connect to MQTT: %s", e)
             self._client = None
 
+    def probe_gateway_local(self, gateway_ip: str) -> None:
+        """Probe gateway for open local ports."""
+        import socket
+        for port in [80, 443, 8080, 8443, 8883, 5683, 9999, 10000]:
+            try:
+                s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                s.settimeout(1)
+                result = s.connect_ex((gateway_ip, port))
+                s.close()
+                if result == 0:
+                    _LOGGER.warning("GATEWAY LOCAL PORT OPEN: %s:%d", gateway_ip, port)
+                else:
+                    _LOGGER.warning("GATEWAY LOCAL PORT CLOSED: %s:%d", gateway_ip, port)
+            except Exception as e:
+                _LOGGER.warning("GATEWAY LOCAL PORT ERROR %s:%d: %s", gateway_ip, port, e)
+
+    def publish_property_set(self, gw_product_key: str, gw_device_name: str, sub_product_key: str, sub_device_name: str, properties: dict) -> None:
+        """Publish a property set command via MQTT through the physical gateway."""
+        if not self._client or not self._connected:
+            _LOGGER.warning("MQTT not connected, cannot publish property set")
+            return
+        import uuid as _uuid
+        msg_id = str(_uuid.uuid4())
+        # Try 1: publish to physical gateway topic with sub-device info
+        topic1 = f"/sys/{gw_product_key}/{gw_device_name}/thing/service/property/set"
+        payload1 = json.dumps({
+            "id": msg_id,
+            "version": "1.0",
+            "method": "thing.service.property.set",
+            "params": {
+                "iotId": f"{sub_device_name}",
+                "productKey": sub_product_key,
+                "deviceName": sub_device_name,
+                "items": properties,
+            },
+        })
+        r1 = self._client.publish(topic1, payload1, qos=1)
+        _LOGGER.warning("MQTT publish GW topic=%s result=%s", topic1, r1)
+        # Try 2: publish directly to sub-device topic
+        topic2 = f"/sys/{sub_product_key}/{sub_device_name}/thing/service/property/set"
+        payload2 = json.dumps({
+            "id": msg_id,
+            "version": "1.0",
+            "method": "thing.service.property.set",
+            "params": properties,
+        })
+        r2 = self._client.publish(topic2, payload2, qos=1)
+        _LOGGER.warning("MQTT publish SUB topic=%s result=%s", topic2, r2)
+
     async def disconnect(self) -> None:
         """Disconnect from MQTT broker."""
         if self._client:
